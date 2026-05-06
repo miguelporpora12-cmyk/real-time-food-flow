@@ -7,8 +7,14 @@ import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { StaffGuard } from "@/components/StaffGuard";
+
 export const Route = createFileRoute("/admin")({
-  component: AdminPage,
+  component: () => (
+    <StaffGuard>
+      <AdminPage />
+    </StaffGuard>
+  ),
 });
 
 type Categoria = { id: string; nome: string; ordem: number };

@@ -1,19 +1,22 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import { UtensilsCrossed, ShoppingBag, ClipboardList, Settings, ChefHat } from "lucide-react";
 import { useCart } from "@/lib/cart-store";
+import { useStaff } from "@/lib/staff-store";
 
-type NavItem = { to: string; label: string; icon: typeof UtensilsCrossed; badge?: boolean };
-const items: NavItem[] = [
+type NavItem = { to: string; label: string; icon: typeof UtensilsCrossed; badge?: boolean; staffOnly?: boolean };
+const ALL_ITEMS: NavItem[] = [
   { to: "/", label: "Cardápio", icon: UtensilsCrossed },
   { to: "/carrinho", label: "Carrinho", icon: ShoppingBag, badge: true },
   { to: "/pedidos", label: "Pedidos", icon: ClipboardList },
-  { to: "/funcionario", label: "Cozinha", icon: ChefHat },
-  { to: "/admin", label: "Admin", icon: Settings },
+  { to: "/funcionario", label: "Cozinha", icon: ChefHat, staffOnly: true },
+  { to: "/admin", label: "Admin", icon: Settings, staffOnly: true },
 ];
 
 export function BottomNav() {
   const loc = useLocation();
   const { count } = useCart();
+  const { isStaff } = useStaff();
+  const items = ALL_ITEMS.filter((i) => !i.staffOnly || isStaff);
   return (
     <nav className="fixed bottom-0 inset-x-0 z-50 border-t border-border bg-card/95 backdrop-blur-md">
       <ul className="mx-auto flex max-w-2xl items-stretch justify-between px-2 py-2 safe-area-pb">

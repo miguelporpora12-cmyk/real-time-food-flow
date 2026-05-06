@@ -5,8 +5,14 @@ import { AppShell } from "@/components/AppShell";
 import { fmtBRL } from "@/lib/cart-store";
 import { useEffect } from "react";
 
+import { StaffGuard } from "@/components/StaffGuard";
+
 export const Route = createFileRoute("/funcionario")({
-  component: FuncionarioPage,
+  component: () => (
+    <StaffGuard>
+      <FuncionarioPage />
+    </StaffGuard>
+  ),
 });
 
 type Status = "confirmado" | "preparando" | "quase_pronto" | "saiu_entrega" | "entregue";
