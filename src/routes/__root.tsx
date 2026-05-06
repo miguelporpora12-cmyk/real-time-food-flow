@@ -10,6 +10,7 @@ import {
 
 import appCss from "../styles.css?url";
 import { CartProvider } from "@/lib/cart-store";
+import { StaffProvider } from "@/lib/staff-store";
 import { Toaster } from "sonner";
 
 function NotFoundComponent() {
@@ -115,10 +116,12 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <CartProvider>
-        <Outlet />
-        <Toaster position="top-center" richColors />
-      </CartProvider>
+      <StaffProvider>
+        <CartProvider>
+          <Outlet />
+          <Toaster position="top-center" richColors />
+        </CartProvider>
+      </StaffProvider>
     </QueryClientProvider>
   );
 }
