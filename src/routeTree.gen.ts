@@ -9,38 +9,135 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as PedidosRouteImport } from './routes/pedidos'
+import { Route as FuncionarioRouteImport } from './routes/funcionario'
+import { Route as CarrinhoRouteImport } from './routes/carrinho'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PreparoPedidoIdRouteImport } from './routes/preparo.$pedidoId'
 
+const PedidosRoute = PedidosRouteImport.update({
+  id: '/pedidos',
+  path: '/pedidos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FuncionarioRoute = FuncionarioRouteImport.update({
+  id: '/funcionario',
+  path: '/funcionario',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CarrinhoRoute = CarrinhoRouteImport.update({
+  id: '/carrinho',
+  path: '/carrinho',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PreparoPedidoIdRoute = PreparoPedidoIdRouteImport.update({
+  id: '/preparo/$pedidoId',
+  path: '/preparo/$pedidoId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/carrinho': typeof CarrinhoRoute
+  '/funcionario': typeof FuncionarioRoute
+  '/pedidos': typeof PedidosRoute
+  '/preparo/$pedidoId': typeof PreparoPedidoIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/carrinho': typeof CarrinhoRoute
+  '/funcionario': typeof FuncionarioRoute
+  '/pedidos': typeof PedidosRoute
+  '/preparo/$pedidoId': typeof PreparoPedidoIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/carrinho': typeof CarrinhoRoute
+  '/funcionario': typeof FuncionarioRoute
+  '/pedidos': typeof PedidosRoute
+  '/preparo/$pedidoId': typeof PreparoPedidoIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/carrinho'
+    | '/funcionario'
+    | '/pedidos'
+    | '/preparo/$pedidoId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/admin'
+    | '/carrinho'
+    | '/funcionario'
+    | '/pedidos'
+    | '/preparo/$pedidoId'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/carrinho'
+    | '/funcionario'
+    | '/pedidos'
+    | '/preparo/$pedidoId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
+  CarrinhoRoute: typeof CarrinhoRoute
+  FuncionarioRoute: typeof FuncionarioRoute
+  PedidosRoute: typeof PedidosRoute
+  PreparoPedidoIdRoute: typeof PreparoPedidoIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/pedidos': {
+      id: '/pedidos'
+      path: '/pedidos'
+      fullPath: '/pedidos'
+      preLoaderRoute: typeof PedidosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/funcionario': {
+      id: '/funcionario'
+      path: '/funcionario'
+      fullPath: '/funcionario'
+      preLoaderRoute: typeof FuncionarioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/carrinho': {
+      id: '/carrinho'
+      path: '/carrinho'
+      fullPath: '/carrinho'
+      preLoaderRoute: typeof CarrinhoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,12 +145,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/preparo/$pedidoId': {
+      id: '/preparo/$pedidoId'
+      path: '/preparo/$pedidoId'
+      fullPath: '/preparo/$pedidoId'
+      preLoaderRoute: typeof PreparoPedidoIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
+  CarrinhoRoute: CarrinhoRoute,
+  FuncionarioRoute: FuncionarioRoute,
+  PedidosRoute: PedidosRoute,
+  PreparoPedidoIdRoute: PreparoPedidoIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
