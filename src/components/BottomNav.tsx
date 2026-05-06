@@ -2,13 +2,14 @@ import { Link, useLocation } from "@tanstack/react-router";
 import { UtensilsCrossed, ShoppingBag, ClipboardList, Settings, ChefHat } from "lucide-react";
 import { useCart } from "@/lib/cart-store";
 
-const items = [
+type NavItem = { to: string; label: string; icon: typeof UtensilsCrossed; badge?: boolean };
+const items: NavItem[] = [
   { to: "/", label: "Cardápio", icon: UtensilsCrossed },
   { to: "/carrinho", label: "Carrinho", icon: ShoppingBag, badge: true },
   { to: "/pedidos", label: "Pedidos", icon: ClipboardList },
   { to: "/funcionario", label: "Cozinha", icon: ChefHat },
   { to: "/admin", label: "Admin", icon: Settings },
-] as const;
+];
 
 export function BottomNav() {
   const loc = useLocation();
