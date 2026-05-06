@@ -96,18 +96,26 @@ function CardapioPage() {
             className="animate-float-up flex items-center gap-3 rounded-2xl border border-border bg-card p-3 shadow-card"
             style={{ animationDelay: `${idx * 30}ms` }}
           >
-            <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-muted">
-              {i.imagem_url && (
-                <img src={i.imagem_url} alt={i.nome} className="h-full w-full object-cover" loading="lazy" />
-              )}
-            </div>
-            <div className="min-w-0 flex-1">
-              <h3 className="truncate font-semibold">{i.nome}</h3>
-              <p className="line-clamp-2 text-xs text-muted-foreground">{i.descricao}</p>
-              <p className="mt-1 font-bold text-primary">{fmtBRL(Number(i.preco))}</p>
-            </div>
+            <Link
+              to="/produto/$id"
+              params={{ id: i.id }}
+              className="flex min-w-0 flex-1 items-center gap-3"
+            >
+              <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-muted">
+                {i.imagem_url && (
+                  <img src={i.imagem_url} alt={i.nome} className="h-full w-full object-cover" loading="lazy" />
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="truncate font-semibold">{i.nome}</h3>
+                <p className="line-clamp-2 text-xs text-muted-foreground">{i.descricao}</p>
+                <p className="mt-1 font-bold text-primary">{fmtBRL(Number(i.preco))}</p>
+              </div>
+            </Link>
             <button
-              onClick={() => {
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 add({ id: i.id, nome: i.nome, preco: Number(i.preco), imagem_url: i.imagem_url });
                 toast.success(`${i.nome} adicionado`);
               }}
