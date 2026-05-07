@@ -29,29 +29,87 @@ type Item = {
 };
 
 function AdminPage() {
-  const [tab, setTab] = useState<"itens" | "categorias">("itens");
+  const [tab, setTab] = useState<"itens" | "categorias" | "avisos">("itens");
 
   return (
     <AppShell>
       <h1 className="text-2xl font-bold">Painel Admin</h1>
-      <p className="text-sm text-muted-foreground">Gerencie cardápio e categorias.</p>
+      <p className="text-sm text-muted-foreground">Gerencie cardápio, categorias e avisos.</p>
 
       <div className="mt-4 flex gap-2 rounded-full bg-muted p-1">
-        {(["itens", "categorias"] as const).map((t) => (
+        {(["itens", "categorias", "avisos"] as const).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`flex-1 rounded-full px-4 py-2 text-sm font-semibold transition ${
+            className={`flex-1 rounded-full px-3 py-2 text-sm font-semibold capitalize transition ${
               tab === t ? "bg-card text-foreground shadow-card" : "text-muted-foreground"
             }`}
           >
-            {t === "itens" ? "Itens" : "Categorias"}
+            {t}
           </button>
         ))}
       </div>
 
-      {tab === "categorias" ? <CategoriasAdmin /> : <ItensAdmin />}
+      {tab === "categorias" && <CategoriasAdmin />}
+      {tab === "itens" && <ItensAdmin />}
+      {tab === "avisos" && <AvisosAdmin />}
     </AppShell>
+  );
+}
+
+function AvisosAdmin() {
+  const [mensagem, setMensagem] = useState("");
+  const [ativo, setAtivo] = useState(false);
+  const [id, setId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const load = async () => {
+    const { data } = await supabase.from("avisos").select("*").limit(1).maybeSingle();
+    if (data) {
+      setId(data.id);
+      setMensagem(data.mensagem ?? "");
+      setAtivo(!!data.ativo);
+    }
+    setLoading(false);
+  };
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useState(() => { load(); return null; });
+
+  const salvar = async () => {
+    const payload = { mensagem, ativo, updated_at: new Date().toISOString() };
+    const { error } = id
+      ? await supabase.from("avisos").update(payload).eq("id", id)
+      : await supabase.from("avisos").insert(payload);
+    if (error) toast.error(error.message);
+    else toast.success("Aviso salvo");
+  };
+
+  if (loading) return <p className="mt-5 text-sm text-muted-foreground">Carregando...</p>;
+
+  return (
+    <div className="mt-5 space-y-3 rounded-2xl border border-border bg-card p-4 shadow-card">
+      <div>
+        <label className="text-xs font-semibold uppercase text-muted-foreground">Mensagem para os clientes</label>
+        <textarea
+          value={mensagem}
+          onChange={(e) => setMensagem(e.target.value)}
+          placeholder="Ex: Seu pedido pode demorar 30 minutos por conta do movimento."
+          rows={4}
+          className="mt-1 w-full resize-none rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary"
+        />
+      </div>
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" checked={ativo} onChange={(e) => setAtivo(e.target.checked)} className="h-4 w-4" />
+        Mostrar este aviso na tela de preparo dos clientes
+      </label>
+      <button onClick={salvar} className="w-full rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground">
+        Salvar aviso
+      </button>
+      <p className="text-[11px] text-muted-foreground">
+        O aviso aparece para o cliente assim que ele faz o pedido. Desative para esconder.
+      </p>
+    </div>
   );
 }
 
