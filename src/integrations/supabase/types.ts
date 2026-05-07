@@ -123,6 +123,7 @@ export type Database = {
       }
       pedidos: {
         Row: {
+          cliente_id: string | null
           created_at: string
           id: string
           mesa: number
@@ -132,6 +133,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          cliente_id?: string | null
           created_at?: string
           id?: string
           mesa: number
@@ -141,6 +143,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          cliente_id?: string | null
           created_at?: string
           id?: string
           mesa?: number
