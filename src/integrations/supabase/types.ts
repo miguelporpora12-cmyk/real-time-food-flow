@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      avisos: {
+        Row: {
+          ativo: boolean
+          id: string
+          mensagem: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          id?: string
+          mensagem?: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          id?: string
+          mensagem?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       categorias: {
         Row: {
           created_at: string
