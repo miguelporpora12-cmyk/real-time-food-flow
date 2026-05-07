@@ -73,8 +73,7 @@ function AvisosAdmin() {
     setLoading(false);
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useState(() => { load(); return null; });
+  useEffect(() => { load(); }, []);
 
   const salvar = async () => {
     const payload = { mensagem, ativo, updated_at: new Date().toISOString() };
