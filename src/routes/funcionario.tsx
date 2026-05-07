@@ -3,7 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
 import { fmtBRL } from "@/lib/cart-store";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+import { BellRing } from "lucide-react";
 
 import { StaffGuard } from "@/components/StaffGuard";
 
@@ -35,7 +37,24 @@ const LABEL: Record<Status, string> = {
   entregue: "Entregue",
 };
 
+function formatElapsed(createdAt: string, now: number) {
+  const diffSec = Math.max(0, Math.floor((now - new Date(createdAt).getTime()) / 1000));
+  const totalMin = Math.floor(diffSec / 60);
+  if (totalMin < 60) {
+    const m = totalMin;
+    const s = diffSec % 60;
+    return `${m}m ${String(s).padStart(2, "0")}s`;
+  }
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  return `${h}h ${String(m).padStart(2, "0")}min`;
+}
+
 function FuncionarioPage() {
+  const [now, setNow] = useState(() => Date.now());
+  const seenRef = useRef<Set<string>>(new Set());
+  const initializedRef = useRef(false);
+
   const pedidos = useQuery({
     queryKey: ["kitchen-pedidos"],
     queryFn: async () => {
@@ -60,6 +79,42 @@ function FuncionarioPage() {
     },
   });
 
+  // Tick every second for live timers
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Detect new orders → notify
+  useEffect(() => {
+    if (!pedidos.data) return;
+    if (!initializedRef.current) {
+      pedidos.data.forEach((p) => seenRef.current.add(p.id));
+      initializedRef.current = true;
+      return;
+    }
+    pedidos.data.forEach((p) => {
+      if (!seenRef.current.has(p.id)) {
+        seenRef.current.add(p.id);
+        toast.success(`🔔 Pedido novo — Mesa ${p.mesa}`, { duration: 6000 });
+        try {
+          const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.frequency.value = 880;
+          o.connect(g);
+          g.connect(ctx.destination);
+          g.gain.setValueAtTime(0.15, ctx.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.4);
+          o.start();
+          o.stop(ctx.currentTime + 0.4);
+        } catch {
+          /* ignore */
+        }
+      }
+    });
+  }, [pedidos.data]);
+
   useEffect(() => {
     const ch = supabase
       .channel("kitchen")
@@ -79,58 +134,65 @@ function FuncionarioPage() {
 
   return (
     <AppShell>
-      <h1 className="text-2xl font-bold">Painel da Cozinha</h1>
-      <p className="text-sm text-muted-foreground">Atualização em tempo real.</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Painel da Cozinha</h1>
+          <p className="text-sm text-muted-foreground">Atualização em tempo real.</p>
+        </div>
+        <span className="inline-flex items-center gap-2 rounded-full bg-primary-soft px-3 py-1 text-xs font-bold text-primary">
+          <BellRing className="h-3.5 w-3.5" /> {pedidos.data?.length ?? 0} ativos
+        </span>
+      </div>
 
-      <div className="mt-5 space-y-4">
+      <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {pedidos.data?.length === 0 && (
-          <p className="rounded-2xl border border-dashed p-8 text-center text-sm text-muted-foreground">
+          <p className="col-span-full rounded-2xl border border-dashed p-8 text-center text-sm text-muted-foreground">
             Sem pedidos ativos.
           </p>
         )}
         {pedidos.data?.map((p) => {
           const its = itens.data?.filter((i) => i.pedido_id === p.id) ?? [];
-          const ageMin = Math.floor((Date.now() - new Date(p.created_at).getTime()) / 60000);
+          const elapsed = formatElapsed(p.created_at, now);
           return (
-            <article key={p.id} className="rounded-3xl border border-border bg-card p-5 shadow-card">
-              <header className="flex items-start justify-between gap-3">
+            <article key={p.id} className="rounded-3xl border border-border bg-card p-4 shadow-card">
+              <header className="flex items-start justify-between gap-2">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Mesa</p>
-                  <p className="text-5xl font-extrabold leading-none text-primary">{p.mesa}</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Mesa</p>
+                  <p className="text-4xl font-extrabold leading-none text-primary">{p.mesa}</p>
                 </div>
                 <div className="text-right">
-                  <span className="inline-block rounded-full bg-primary-soft px-3 py-1 text-xs font-bold text-primary">
+                  <span className="inline-block rounded-full bg-primary-soft px-2 py-0.5 text-[10px] font-bold text-primary">
                     {LABEL[p.status]}
                   </span>
-                  <p className="mt-1 text-xs text-muted-foreground">há {ageMin} min</p>
+                  <p className="mt-1 font-mono text-xs font-semibold tabular-nums text-foreground">{elapsed}</p>
                 </div>
               </header>
 
-              <ul className="mt-4 space-y-1.5 border-t border-border pt-3 text-sm">
+              <ul className="mt-3 space-y-1 border-t border-border pt-2 text-xs">
                 {its.map((i) => (
-                  <li key={i.id} className="flex justify-between">
-                    <span>
+                  <li key={i.id} className="flex justify-between gap-2">
+                    <span className="truncate">
                       <span className="font-bold text-primary">{i.quantidade}x</span> {i.nome}
                     </span>
-                    <span className="text-muted-foreground">{fmtBRL(Number(i.preco_unitario) * i.quantidade)}</span>
+                    <span className="shrink-0 text-muted-foreground">{fmtBRL(Number(i.preco_unitario) * i.quantidade)}</span>
                   </li>
                 ))}
               </ul>
 
               {p.observacao && (
-                <p className="mt-3 rounded-xl bg-muted px-3 py-2 text-xs italic text-muted-foreground">
+                <p className="mt-2 rounded-lg bg-muted px-2 py-1.5 text-[11px] italic text-muted-foreground">
                   Obs: {p.observacao}
                 </p>
               )}
 
-              <div className="mt-4 flex items-center justify-between">
-                <span className="font-bold">{fmtBRL(Number(p.total))}</span>
+              <div className="mt-3 flex items-center justify-between gap-2">
+                <span className="text-sm font-bold">{fmtBRL(Number(p.total))}</span>
                 {NEXT[p.status] && (
                   <button
                     onClick={() => advance(p)}
-                    className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-soft"
+                    className="rounded-lg bg-primary px-2.5 py-1.5 text-[11px] font-semibold text-primary-foreground shadow-soft"
                   >
-                    Avançar → {LABEL[NEXT[p.status]!]}
+                    Avançar
                   </button>
                 )}
               </div>
