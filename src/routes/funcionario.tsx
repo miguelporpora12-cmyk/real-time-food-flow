@@ -33,7 +33,7 @@ const LABEL: Record<Status, string> = {
   confirmado: "Confirmado",
   preparando: "Na cozinha",
   quase_pronto: "Quase pronto",
-  saiu_entrega: "A caminho",
+  saiu_entrega: "Garçom indo à mesa",
   entregue: "Entregue",
 };
 
