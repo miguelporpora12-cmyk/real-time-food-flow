@@ -133,7 +133,7 @@ function FuncionarioPage() {
   };
 
   return (
-    <AppShell>
+    <AppShell wide>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Painel da Cozinha</h1>
