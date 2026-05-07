@@ -5,6 +5,7 @@ import { Minus, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { getClienteId } from "@/lib/client-id";
 
 export const Route = createFileRoute("/carrinho")({
   component: CarrinhoPage,
@@ -28,7 +29,7 @@ function CarrinhoPage() {
     try {
       const { data: pedido, error } = await supabase
         .from("pedidos")
-        .insert({ mesa: mesaNum, total, status: "confirmado", observacao: obs || null })
+        .insert({ mesa: mesaNum, total, status: "confirmado", observacao: obs || null, cliente_id: getClienteId() })
         .select()
         .single();
       if (error || !pedido) throw error;

@@ -4,12 +4,13 @@ import { LogIn, LogOut, ShieldCheck } from "lucide-react";
 import { BottomNav } from "./BottomNav";
 import { useStaff } from "@/lib/staff-store";
 
-export function AppShell({ children }: { children: ReactNode }) {
+export function AppShell({ children, wide = false }: { children: ReactNode; wide?: boolean }) {
   const { isStaff, logout } = useStaff();
+  const max = wide ? "max-w-7xl" : "max-w-2xl";
   return (
     <div className="min-h-screen bg-background pb-32">
       <header className="sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur-md">
-        <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
+        <div className={`mx-auto flex ${max} items-center justify-between px-4 py-3`}>
           <Link to="/" className="text-sm font-bold tracking-tight">
             🍽️ Cardápio
           </Link>
@@ -32,7 +33,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           )}
         </div>
       </header>
-      <div className="mx-auto max-w-2xl px-4 pt-6">{children}</div>
+      <div className={`mx-auto ${max} px-4 pt-6`}>{children}</div>
       <BottomNav />
     </div>
   );
