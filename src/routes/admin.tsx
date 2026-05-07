@@ -266,11 +266,9 @@ function ItensAdmin() {
               ))}
             </select>
           </div>
-          <input
-            placeholder="URL da imagem"
-            value={editing.imagem_url ?? ""}
-            onChange={(e) => setEditing({ ...editing, imagem_url: e.target.value })}
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+          <ImageUploader
+            value={editing.imagem_url ?? null}
+            onChange={(url) => setEditing({ ...editing, imagem_url: url })}
           />
           <div className="flex gap-2">
             <button onClick={save} className="flex-1 rounded-lg bg-primary py-2 text-sm font-semibold text-primary-foreground">
