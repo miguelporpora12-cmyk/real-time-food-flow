@@ -303,3 +303,69 @@ function ItensAdmin() {
     </div>
   );
 }
+
+function ImageUploader({ value, onChange }: { value: string | null; onChange: (url: string | null) => void }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const upload = async (file: File) => {
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop() || "jpg";
+      const path = `${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage.from("itens-img").upload(path, file, {
+        cacheControl: "3600",
+        upsert: false,
+        contentType: file.type,
+      });
+      if (error) throw error;
+      const { data } = supabase.storage.from("itens-img").getPublicUrl(path);
+      onChange(data.publicUrl);
+      toast.success("Imagem enviada");
+    } catch (e: any) {
+      toast.error(e.message ?? "Erro ao enviar imagem");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      <label className="text-xs font-semibold uppercase text-muted-foreground">Foto do prato</label>
+      <div className="flex items-center gap-3">
+        <div className="h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-border bg-muted">
+          {value && <img src={value} alt="" className="h-full w-full object-cover" />}
+        </div>
+        <div className="flex flex-1 flex-col gap-2">
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) upload(f);
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            disabled={uploading}
+            className="rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground disabled:opacity-50"
+          >
+            {uploading ? "Enviando..." : value ? "Trocar imagem" : "Enviar imagem"}
+          </button>
+          {value && (
+            <button
+              type="button"
+              onClick={() => onChange(null)}
+              className="rounded-lg border border-border px-3 py-1.5 text-xs"
+            >
+              Remover
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
