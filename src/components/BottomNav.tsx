@@ -1,5 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { UtensilsCrossed, ShoppingBag, ClipboardList, Settings, ChefHat } from "lucide-react";
+import { UtensilsCrossed, ShoppingBag, ClipboardList, Settings, ChefHat, BarChart3, Receipt } from "lucide-react";
 import { useCart } from "@/lib/cart-store";
 import { useStaff } from "@/lib/staff-store";
 
@@ -9,6 +9,8 @@ const ALL_ITEMS: NavItem[] = [
   { to: "/carrinho", label: "Carrinho", icon: ShoppingBag, badge: true },
   { to: "/pedidos", label: "Pedidos", icon: ClipboardList },
   { to: "/funcionario", label: "Cozinha", icon: ChefHat, staffOnly: true },
+  { to: "/recibo", label: "Recibo", icon: Receipt, staffOnly: true },
+  { to: "/historico", label: "Métricas", icon: BarChart3, staffOnly: true },
   { to: "/admin", label: "Admin", icon: Settings, staffOnly: true },
 ];
 

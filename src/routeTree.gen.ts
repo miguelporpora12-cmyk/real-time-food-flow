@@ -9,15 +9,23 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ReciboRouteImport } from './routes/recibo'
 import { Route as PedidosRouteImport } from './routes/pedidos'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as HistoricoRouteImport } from './routes/historico'
 import { Route as FuncionarioRouteImport } from './routes/funcionario'
 import { Route as CarrinhoRouteImport } from './routes/carrinho'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ReciboPedidoIdRouteImport } from './routes/recibo.$pedidoId'
 import { Route as ProdutoIdRouteImport } from './routes/produto.$id'
 import { Route as PreparoPedidoIdRouteImport } from './routes/preparo.$pedidoId'
 
+const ReciboRoute = ReciboRouteImport.update({
+  id: '/recibo',
+  path: '/recibo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PedidosRoute = PedidosRouteImport.update({
   id: '/pedidos',
   path: '/pedidos',
@@ -26,6 +34,11 @@ const PedidosRoute = PedidosRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HistoricoRoute = HistoricoRouteImport.update({
+  id: '/historico',
+  path: '/historico',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FuncionarioRoute = FuncionarioRouteImport.update({
@@ -48,6 +61,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReciboPedidoIdRoute = ReciboPedidoIdRouteImport.update({
+  id: '/$pedidoId',
+  path: '/$pedidoId',
+  getParentRoute: () => ReciboRoute,
+} as any)
 const ProdutoIdRoute = ProdutoIdRouteImport.update({
   id: '/produto/$id',
   path: '/produto/$id',
@@ -64,20 +82,26 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/carrinho': typeof CarrinhoRoute
   '/funcionario': typeof FuncionarioRoute
+  '/historico': typeof HistoricoRoute
   '/login': typeof LoginRoute
   '/pedidos': typeof PedidosRoute
+  '/recibo': typeof ReciboRouteWithChildren
   '/preparo/$pedidoId': typeof PreparoPedidoIdRoute
   '/produto/$id': typeof ProdutoIdRoute
+  '/recibo/$pedidoId': typeof ReciboPedidoIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/carrinho': typeof CarrinhoRoute
   '/funcionario': typeof FuncionarioRoute
+  '/historico': typeof HistoricoRoute
   '/login': typeof LoginRoute
   '/pedidos': typeof PedidosRoute
+  '/recibo': typeof ReciboRouteWithChildren
   '/preparo/$pedidoId': typeof PreparoPedidoIdRoute
   '/produto/$id': typeof ProdutoIdRoute
+  '/recibo/$pedidoId': typeof ReciboPedidoIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -85,10 +109,13 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/carrinho': typeof CarrinhoRoute
   '/funcionario': typeof FuncionarioRoute
+  '/historico': typeof HistoricoRoute
   '/login': typeof LoginRoute
   '/pedidos': typeof PedidosRoute
+  '/recibo': typeof ReciboRouteWithChildren
   '/preparo/$pedidoId': typeof PreparoPedidoIdRoute
   '/produto/$id': typeof ProdutoIdRoute
+  '/recibo/$pedidoId': typeof ReciboPedidoIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -97,30 +124,39 @@ export interface FileRouteTypes {
     | '/admin'
     | '/carrinho'
     | '/funcionario'
+    | '/historico'
     | '/login'
     | '/pedidos'
+    | '/recibo'
     | '/preparo/$pedidoId'
     | '/produto/$id'
+    | '/recibo/$pedidoId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/admin'
     | '/carrinho'
     | '/funcionario'
+    | '/historico'
     | '/login'
     | '/pedidos'
+    | '/recibo'
     | '/preparo/$pedidoId'
     | '/produto/$id'
+    | '/recibo/$pedidoId'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/carrinho'
     | '/funcionario'
+    | '/historico'
     | '/login'
     | '/pedidos'
+    | '/recibo'
     | '/preparo/$pedidoId'
     | '/produto/$id'
+    | '/recibo/$pedidoId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -128,14 +164,23 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   CarrinhoRoute: typeof CarrinhoRoute
   FuncionarioRoute: typeof FuncionarioRoute
+  HistoricoRoute: typeof HistoricoRoute
   LoginRoute: typeof LoginRoute
   PedidosRoute: typeof PedidosRoute
+  ReciboRoute: typeof ReciboRouteWithChildren
   PreparoPedidoIdRoute: typeof PreparoPedidoIdRoute
   ProdutoIdRoute: typeof ProdutoIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/recibo': {
+      id: '/recibo'
+      path: '/recibo'
+      fullPath: '/recibo'
+      preLoaderRoute: typeof ReciboRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pedidos': {
       id: '/pedidos'
       path: '/pedidos'
@@ -148,6 +193,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/historico': {
+      id: '/historico'
+      path: '/historico'
+      fullPath: '/historico'
+      preLoaderRoute: typeof HistoricoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/funcionario': {
@@ -178,6 +230,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/recibo/$pedidoId': {
+      id: '/recibo/$pedidoId'
+      path: '/$pedidoId'
+      fullPath: '/recibo/$pedidoId'
+      preLoaderRoute: typeof ReciboPedidoIdRouteImport
+      parentRoute: typeof ReciboRoute
+    }
     '/produto/$id': {
       id: '/produto/$id'
       path: '/produto/$id'
@@ -195,13 +254,26 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface ReciboRouteChildren {
+  ReciboPedidoIdRoute: typeof ReciboPedidoIdRoute
+}
+
+const ReciboRouteChildren: ReciboRouteChildren = {
+  ReciboPedidoIdRoute: ReciboPedidoIdRoute,
+}
+
+const ReciboRouteWithChildren =
+  ReciboRoute._addFileChildren(ReciboRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   CarrinhoRoute: CarrinhoRoute,
   FuncionarioRoute: FuncionarioRoute,
+  HistoricoRoute: HistoricoRoute,
   LoginRoute: LoginRoute,
   PedidosRoute: PedidosRoute,
+  ReciboRoute: ReciboRouteWithChildren,
   PreparoPedidoIdRoute: PreparoPedidoIdRoute,
   ProdutoIdRoute: ProdutoIdRoute,
 }

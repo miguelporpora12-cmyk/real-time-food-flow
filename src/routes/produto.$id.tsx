@@ -42,7 +42,7 @@ function ProdutoPage() {
       add({ id: item.data.id, nome: item.data.nome, preco: Number(item.data.preco), imagem_url: item.data.imagem_url });
     }
     toast.success(`${qty}x ${item.data.nome} adicionado`);
-    navigate({ to: "/carrinho" });
+    navigate({ to: "/" });
   };
 
   if (item.isLoading) {
