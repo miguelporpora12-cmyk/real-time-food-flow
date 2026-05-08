@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
 import { fmtBRL } from "@/lib/cart-store";
 import { ChevronRight, Trash2 } from "lucide-react";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { getClienteId } from "@/lib/client-id";
 import { useStaff } from "@/lib/staff-store";
 import { toast } from "sonner";
