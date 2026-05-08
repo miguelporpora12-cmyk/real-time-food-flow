@@ -108,16 +108,20 @@ function FuncionarioPage() {
     });
   }, [pedidos.data]);
 
+  const refetchPedidosRef = useRef(pedidos.refetch);
+  const refetchItensRef = useRef(itens.refetch);
+  refetchPedidosRef.current = pedidos.refetch;
+  refetchItensRef.current = itens.refetch;
   useEffect(() => {
     const ch = supabase
       .channel("kitchen")
-      .on("postgres_changes", { event: "*", schema: "public", table: "pedidos" }, () => pedidos.refetch())
-      .on("postgres_changes", { event: "*", schema: "public", table: "pedido_itens" }, () => itens.refetch())
+      .on("postgres_changes", { event: "*", schema: "public", table: "pedidos" }, () => refetchPedidosRef.current())
+      .on("postgres_changes", { event: "*", schema: "public", table: "pedido_itens" }, () => refetchItensRef.current())
       .subscribe();
     return () => {
       supabase.removeChannel(ch);
     };
-  }, [pedidos, itens]);
+  }, []);
 
   const setStatus = async (p: Pedido, s: Status) => {
     if (p.status === s) return;
