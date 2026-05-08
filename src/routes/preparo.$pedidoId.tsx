@@ -50,7 +50,7 @@ function statusCopy(status: Status, mesa: number | null) {
     case "saiu_entrega":
       return { badge: "GARÇOM A CAMINHO", title: `O garçom está indo até a ${mesaStr}`, sub: "Prepare-se: seu pedido chega em instantes." };
     case "entregue":
-      return { badge: "ENTREGUE", title: "Bom apetite!", sub: "Seu pedido foi entregue. Aproveite!" };
+      return { badge: "ENTREGUE", title: "O garçom entregou o seu pedido", sub: "Bom apetite! Aproveite sua refeição." };
   }
 }
 
