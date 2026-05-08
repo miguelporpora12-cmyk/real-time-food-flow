@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
 import { fmtBRL } from "@/lib/cart-store";
 import { ChevronRight, Trash2 } from "lucide-react";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { getClienteId } from "@/lib/client-id";
 import { useStaff } from "@/lib/staff-store";
 import { toast } from "sonner";
@@ -35,15 +35,17 @@ function PedidosPage() {
     },
   });
 
+  const refetchRef = useRef(q.refetch);
+  refetchRef.current = q.refetch;
   useEffect(() => {
     const ch = supabase
       .channel("pedidos-list")
-      .on("postgres_changes", { event: "*", schema: "public", table: "pedidos" }, () => q.refetch())
+      .on("postgres_changes", { event: "*", schema: "public", table: "pedidos" }, () => refetchRef.current())
       .subscribe();
     return () => {
       supabase.removeChannel(ch);
     };
-  }, [q]);
+  }, []);
 
   const arquivar = async (e: React.MouseEvent, p: Pedido) => {
     e.preventDefault();
