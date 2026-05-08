@@ -6,6 +6,7 @@ import { fmtBRL, useCart } from "@/lib/cart-store";
 import { Plus, Search, ShoppingBag } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 export const Route = createFileRoute("/")({
   component: CardapioPage,
@@ -89,7 +90,19 @@ function CardapioPage() {
       </div>
 
       <section className="mt-4 grid grid-cols-1 gap-3">
-        {itens.isLoading && <p className="text-sm text-muted-foreground">Carregando cardápio...</p>}
+        {(itens.isLoading || cats.isLoading) && (
+          <div className="flex flex-col items-center justify-center py-10">
+            <div className="flex h-32 w-32 items-center justify-center rounded-full bg-primary-soft p-3 shadow-soft">
+              <DotLottieReact
+                src="/animations/loading.lottie"
+                autoplay
+                loop
+                className="h-full w-full [mix-blend-mode:multiply]"
+              />
+            </div>
+            <p className="mt-3 text-sm font-medium text-primary">Carregando cardápio...</p>
+          </div>
+        )}
         {filtered.map((i, idx) => (
           <article
             key={i.id}

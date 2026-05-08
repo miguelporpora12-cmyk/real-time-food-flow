@@ -5,7 +5,8 @@ import { AppShell } from "@/components/AppShell";
 import { fmtBRL } from "@/lib/cart-store";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { BellRing } from "lucide-react";
+import { BellRing, Trash2 } from "lucide-react";
+import { ensureNotifPermission, notify } from "@/lib/notify";
 
 import { StaffGuard } from "@/components/StaffGuard";
 
@@ -21,19 +22,18 @@ type Status = "confirmado" | "preparando" | "quase_pronto" | "saiu_entrega" | "e
 type Pedido = { id: string; mesa: number; status: Status; total: number; created_at: string; observacao: string | null };
 type ItemRow = { id: string; pedido_id: string; nome: string; quantidade: number; preco_unitario: number };
 
-const NEXT: Record<Status, Status | null> = {
-  confirmado: "preparando",
-  preparando: "quase_pronto",
-  quase_pronto: "saiu_entrega",
-  saiu_entrega: "entregue",
-  entregue: null,
-};
+const STATUS_OPTIONS: { key: Status; label: string }[] = [
+  { key: "confirmado", label: "Pedido confirmado" },
+  { key: "preparando", label: "Na cozinha" },
+  { key: "quase_pronto", label: "Quase pronto" },
+  { key: "saiu_entrega", label: "Garçom a caminho" },
+];
 
 const LABEL: Record<Status, string> = {
   confirmado: "Confirmado",
   preparando: "Na cozinha",
   quase_pronto: "Quase pronto",
-  saiu_entrega: "Garçom indo à mesa",
+  saiu_entrega: "Garçom a caminho",
   entregue: "Entregue",
 };
 
@@ -61,6 +61,7 @@ function FuncionarioPage() {
       const { data, error } = await supabase
         .from("pedidos")
         .select("*")
+        .eq("arquivado", false)
         .neq("status", "entregue")
         .order("created_at", { ascending: true });
       if (error) throw error;
@@ -85,6 +86,11 @@ function FuncionarioPage() {
     return () => clearInterval(id);
   }, []);
 
+  // Pedir permissão para notificações ao montar
+  useEffect(() => {
+    ensureNotifPermission();
+  }, []);
+
   // Detect new orders → notify
   useEffect(() => {
     if (!pedidos.data) return;
@@ -97,20 +103,7 @@ function FuncionarioPage() {
       if (!seenRef.current.has(p.id)) {
         seenRef.current.add(p.id);
         toast.success(`🔔 Pedido novo — Mesa ${p.mesa}`, { duration: 6000 });
-        try {
-          const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-          const o = ctx.createOscillator();
-          const g = ctx.createGain();
-          o.frequency.value = 880;
-          o.connect(g);
-          g.connect(ctx.destination);
-          g.gain.setValueAtTime(0.15, ctx.currentTime);
-          g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.4);
-          o.start();
-          o.stop(ctx.currentTime + 0.4);
-        } catch {
-          /* ignore */
-        }
+        notify("Novo pedido", `Mesa ${p.mesa} — ${fmtBRL(Number(p.total))}`);
       }
     });
   }, [pedidos.data]);
@@ -126,10 +119,20 @@ function FuncionarioPage() {
     };
   }, [pedidos, itens]);
 
-  const advance = async (p: Pedido) => {
-    const next = NEXT[p.status];
-    if (!next) return;
-    await supabase.from("pedidos").update({ status: next, updated_at: new Date().toISOString() }).eq("id", p.id);
+  const setStatus = async (p: Pedido, s: Status) => {
+    if (p.status === s) return;
+    const { error } = await supabase
+      .from("pedidos")
+      .update({ status: s, updated_at: new Date().toISOString() })
+      .eq("id", p.id);
+    if (error) toast.error(error.message);
+  };
+
+  const arquivar = async (p: Pedido) => {
+    if (!confirm(`Apagar pedido da mesa ${p.mesa}? Ele continuará nas métricas.`)) return;
+    const { error } = await supabase.from("pedidos").update({ arquivado: true }).eq("id", p.id);
+    if (error) return toast.error(error.message);
+    toast.success("Pedido apagado");
   };
 
   return (
@@ -187,14 +190,32 @@ function FuncionarioPage() {
 
               <div className="mt-3 flex items-center justify-between gap-2">
                 <span className="text-sm font-bold">{fmtBRL(Number(p.total))}</span>
-                {NEXT[p.status] && (
-                  <button
-                    onClick={() => advance(p)}
-                    className="rounded-lg bg-primary px-2.5 py-1.5 text-[11px] font-semibold text-primary-foreground shadow-soft"
-                  >
-                    Avançar
-                  </button>
-                )}
+                <button
+                  onClick={() => arquivar(p)}
+                  className="inline-flex items-center gap-1 rounded-lg border border-destructive/40 bg-destructive/10 px-2 py-1 text-[11px] font-semibold text-destructive"
+                  aria-label="Apagar pedido"
+                >
+                  <Trash2 className="h-3 w-3" /> Apagar
+                </button>
+              </div>
+
+              <div className="mt-2 grid grid-cols-2 gap-1.5">
+                {STATUS_OPTIONS.map((opt) => {
+                  const active = p.status === opt.key;
+                  return (
+                    <button
+                      key={opt.key}
+                      onClick={() => setStatus(p, opt.key)}
+                      className={`rounded-lg px-2 py-1.5 text-[10px] font-semibold transition-colors ${
+                        active
+                          ? "bg-primary text-primary-foreground shadow-soft"
+                          : "border border-border bg-background text-foreground hover:border-primary"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
               </div>
             </article>
           );
