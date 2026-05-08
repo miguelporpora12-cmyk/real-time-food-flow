@@ -35,15 +35,17 @@ function PedidosPage() {
     },
   });
 
+  const refetchRef = useRef(q.refetch);
+  refetchRef.current = q.refetch;
   useEffect(() => {
     const ch = supabase
       .channel("pedidos-list")
-      .on("postgres_changes", { event: "*", schema: "public", table: "pedidos" }, () => q.refetch())
+      .on("postgres_changes", { event: "*", schema: "public", table: "pedidos" }, () => refetchRef.current())
       .subscribe();
     return () => {
       supabase.removeChannel(ch);
     };
-  }, [q]);
+  }, []);
 
   const arquivar = async (e: React.MouseEvent, p: Pedido) => {
     e.preventDefault();
