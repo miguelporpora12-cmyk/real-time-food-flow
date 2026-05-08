@@ -27,6 +27,7 @@ const STATUS_OPTIONS: { key: Status; label: string }[] = [
   { key: "preparando", label: "Na cozinha" },
   { key: "quase_pronto", label: "Quase pronto" },
   { key: "saiu_entrega", label: "Garçom a caminho" },
+  { key: "entregue", label: "Entregue" },
 ];
 
 const LABEL: Record<Status, string> = {
